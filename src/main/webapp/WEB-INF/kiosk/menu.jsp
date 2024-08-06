@@ -1,6 +1,9 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+
+<%@ include file="../includes/header.jsp" %>
+
 <html>
 <head>
     <title>Menu</title>
@@ -25,6 +28,15 @@
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 5px;
+            display: flex;
+            align-items: center;
+        }
+
+        .menu-item img {
+            width: 100px; /* Set the width of the image */
+            height: 100px; /* Set the height of the image */
+            object-fit: cover; /* Ensure the image covers the area proportionally */
+            margin-right: 20px; /* Space between image and text */
         }
 
         .menu-item h3 {
@@ -32,18 +44,39 @@
             font-size: 1.2em;
         }
 
+        .menu-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .menu-details h3, .menu-details p {
+            margin: 5px 0;
+        }
+
         .hidden {
             display: none;
         }
     </style>
 </head>
-<body>
-<h1>MENU</h1>
 
 <!-- 카테고리 버튼 생성 -->
 <div>
     <c:set var="lastCategoryId" value="-1" />
     <c:set var="selectedCategory" value="${param.category}" />
+
+    <!-- Check if the selectedCategory is valid -->
+    <c:set var="isValidCategory" value="false" />
+    <c:forEach var="menu" items="${menuList}">
+        <c:if test="${selectedCategory == menu.category.cno}">
+            <c:set var="isValidCategory" value="true" />
+        </c:if>
+    </c:forEach>
+
+    <!-- Use default category if selectedCategory is invalid -->
+    <c:if test="${!isValidCategory}">
+        <c:set var="selectedCategory" value="1" />
+    </c:if>
+
     <c:forEach var="menu" items="${menuList}">
         <c:if test="${lastCategoryId != menu.category.cno}">
             <a class="category-button ${selectedCategory == menu.category.cno ? 'active' : ''}"
@@ -73,8 +106,23 @@
     </c:if>
     <div class="menu-item">
         <img src="/img/m${menu.mno}_c${menu.category.cno}.jpg" alt="${menu.name} image">
-        <h3>${menu.name}</h3>
-        <p>${menu.description}</p>
+        <div class="menu-details">
+            <h3>${menu.name}</h3>
+            <h3>가격 : ${menu.price}</h3>
+            <p>${menu.description}</p>
+
+            <%--  이 부분이 수량 증가시켜서 넘기는 부분      --%>
+
+            <form action="/order" method="post">
+                <input type="hidden" name="price" value="${menu.price}" />
+                <label for="quantity">Quantity:</label>
+                <input type="number" id="quantity" name="quantity" min="1" value="1" />
+                <button>Add to Order</button>
+            </form>
+
+            <%--  여기 사이          --%>
+
+        </div>
     </div>
     </c:if>
     </c:forEach>
@@ -82,3 +130,5 @@
 
 </body>
 </html>
+
+<%@ include file="../includes/footer.jsp" %>
