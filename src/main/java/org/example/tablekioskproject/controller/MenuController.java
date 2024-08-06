@@ -14,17 +14,14 @@ import java.util.List;
 
 @WebServlet(value = "/menu")
 @Log4j2
-public class MenuListController extends HttpServlet {
-    // 새로만든 브랜치 때문에 커밋하려고 주석 추가
+public class MenuController extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        log.info("MenuListController doGet");
+        log.info("MenuController doGet");
 
         try {
-            List<MenuVO> menuList = KioskDAO.INSTANCE.getAllMenus();
-
-            log.info(menuList);
+            List<MenuVO> menuList = KioskDAO.INSTANCE.getCategoryMenus();
 
             req.setAttribute("menuList", menuList);
 
@@ -34,4 +31,7 @@ public class MenuListController extends HttpServlet {
 
         req.getRequestDispatcher("/WEB-INF/kiosk/menu.jsp").forward(req, resp);
     }
+
+
+
 }

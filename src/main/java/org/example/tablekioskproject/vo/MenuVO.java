@@ -18,4 +18,5 @@ public class MenuVO {
     private boolean is_sold_out;
     private boolean isRecommend;
     private boolean delflag;
+    private CategoryVO category;
 }

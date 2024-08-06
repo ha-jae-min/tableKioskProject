@@ -3,6 +3,7 @@ package org.example.tablekioskproject.dao;
 import lombok.Cleanup;
 import lombok.extern.log4j.Log4j2;
 import org.example.tablekioskproject.common.ConnectionUtil;
+import org.example.tablekioskproject.vo.CategoryVO;
 import org.example.tablekioskproject.vo.MenuVO;
 
 import java.sql.Connection;
@@ -43,31 +44,46 @@ public enum KioskDAO {
         return menuList;
     }
 
-    //카테고리별 조회
-    public List<MenuVO> getCategoryMenus() throws Exception{
+    // 카테고리별 조회
+    public List<MenuVO> getCategoryMenus() throws Exception {
         String query = """
-            select
-                m.name, m.price, m.is_recommend, m.description, c.name
-            from
+            SELECT
+                m.mno, m.name, m.price, m.is_recommend, m.description, 
+                m.is_sold_out, m.delflag, c.cno AS category_id, c.name AS category_name
+            FROM
                 tbl_k_menu m
-                inner join
-                    tbl_k_category c ON m.category_id = c.cno
-            order by m.category_id
+            INNER JOIN
+                tbl_k_category c ON m.category_id = c.cno
+            ORDER BY c.cno, m.name
             """;
 
         List<MenuVO> menuList = new ArrayList<>();
-        @Cleanup Connection con = ConnectionUtil.INSTANCE.getDs().getConnection();
-        @Cleanup PreparedStatement ps = con.prepareStatement(query);
-        @Cleanup ResultSet rs = ps.executeQuery();
-        while (rs.next()) {
-            MenuVO menu = MenuVO.builder()
-                    .name(rs.getString("m.name"))
-                    .price(rs.getBigDecimal("m.price"))
-                    .isRecommend(rs.getBoolean("m.is_recommend"))
-                    .description(rs.getString("m.description"))
-                    .build();
+        try (Connection con = ConnectionUtil.INSTANCE.getDs().getConnection();
+             PreparedStatement ps = con.prepareStatement(query);
+             ResultSet rs = ps.executeQuery()) {
 
-            menuList.add(menu);
+            while (rs.next()) {
+                // 카테고리 정보를 담을 객체 생성
+                CategoryVO category = CategoryVO.builder()
+                        .cno(rs.getInt("category_id"))
+                        .name(rs.getString("category_name"))
+                        .build();
+
+                // 메뉴 객체 생성
+                MenuVO menu = MenuVO.builder()
+                        .mno(rs.getInt("mno"))
+                        .categoryId(rs.getInt("category_id"))
+                        .name(rs.getString("name"))  // 컬럼 이름에 테이블 별칭 제거
+                        .price(rs.getBigDecimal("price"))
+                        .isRecommend(rs.getBoolean("is_recommend"))
+                        .description(rs.getString("description"))
+                        .is_sold_out(rs.getBoolean("is_sold_out"))
+                        .delflag(rs.getBoolean("delflag"))
+                        .category(category) // 카테고리 정보 추가
+                        .build();
+
+                menuList.add(menu);
+            }
         }
         return menuList;
     }
