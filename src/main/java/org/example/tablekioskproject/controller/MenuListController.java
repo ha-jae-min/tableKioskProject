@@ -15,6 +15,8 @@ import java.util.List;
 @WebServlet(value = "/menu")
 @Log4j2
 public class MenuListController extends HttpServlet {
+    // 새로만든 브랜치 때문에 커밋하려고 주석 추가
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         log.info("MenuListController doGet");

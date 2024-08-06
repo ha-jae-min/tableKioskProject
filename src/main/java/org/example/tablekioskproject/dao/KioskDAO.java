@@ -13,6 +13,7 @@ import java.util.List;
 
 @Log4j2
 public enum KioskDAO {
+    // 새로만든 브랜치 때문에 커밋하려고 주석 추가
 
     INSTANCE;
 
