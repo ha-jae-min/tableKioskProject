@@ -48,13 +48,11 @@ public enum KioskDAO {
     public List<MenuVO> getCategoryMenus() throws Exception {
         String query = """
             SELECT
-                m.mno, m.name, m.price, m.is_recommend, m.description, 
-                m.is_sold_out, m.delflag, c.cno AS category_id, c.name AS category_name
+                m.name, m.price, d.quantity, d.total_price
             FROM
                 tbl_k_menu m
             INNER JOIN
-                tbl_k_category c ON m.category_id = c.cno
-            ORDER BY c.cno, m.name
+                tbl_k_detail d
             """;
 
         List<MenuVO> menuList = new ArrayList<>();

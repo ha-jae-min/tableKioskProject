@@ -1,15 +1,26 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: USER
-  Date: 2024-08-06
-  Time: 오전 11:47
-  To change this template use File | Settings | File Templates.
---%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %> <!-- JSTL 코어 라이브러리 추가 -->
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <html>
 <head>
     <title>메뉴 검색</title>
+    <style>
+        .category-header {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f2f2f2;
+            font-size: 1.5em;
+        }
+
+        .menu-item {
+            margin-left: 20px;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .menu-item span {
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
 <h1>메뉴 검색</h1>
@@ -18,21 +29,27 @@
     <button type="submit">검색</button>
 </form>
 
-<c:if test="${not empty searchResults}">
-    <h2>검색 결과</h2>
-    <ul>
-        <c:forEach var="menu" items="${searchResults}">
-            <li>
-                <strong>${menu.name}</strong>: ${menu.description}<br>
-                가격: ${menu.price}원
-            </li>
-        </c:forEach>
-    </ul>
-</c:if>
+<c:choose>
+    <c:when test="${not empty menuList}">
+        <c:set var="lastCategoryId" value="-1" />
 
-<c:if test="${empty searchResults}">
-    <p>검색 결과가 없습니다.</p>
-</c:if>
+        <c:forEach var="menu" items="${menuList}">
+            <!-- 카테고리가 바뀔 때만 헤더 출력 -->
+            <c:if test="${lastCategoryId != menu.category.categoryId}">
+                <c:set var="lastCategoryId" value="${menu.category.categoryId}" />
+                <div class="category-header">${menu.category.name}</div>
+            </c:if>
+
+            <!-- 메뉴 아이템 출력 -->
+            <div class="menu-item">
+                <span>${menu.name}</span>: ${menu.description}
+            </div>
+        </c:forEach>
+    </c:when>
+    <c:otherwise>
+        <p>등록된 메뉴가 없습니다.</p>
+    </c:otherwise>
+</c:choose>
 
 </body>
 </html>

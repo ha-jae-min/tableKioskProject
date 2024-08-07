@@ -9,10 +9,12 @@ import java.math.BigDecimal;
 @Builder
 @Getter
 @ToString
-public class DetailVO {
-    private Integer ono;
-    private Integer mno;
+public class OrderDetailVO {
+    private int ono;         // Add ono field
+    private int mno;         // Add mno field
+    private int category_id;
+    private String menuName;
+    private BigDecimal menuPrice;
     private int quantity;
     private BigDecimal total_price;
-    private MenuVO menuVO;
 }

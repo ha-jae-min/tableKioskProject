@@ -1,25 +1,26 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="org.example.tablekioskproject.vo.OrderDetailVO" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.math.BigDecimal" %>
-
-<%@ include file="../includes/header.jsp"%>
-
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"> <!-- Bootstrap CSS -->
     <style>
         body {
             font-family: Arial, sans-serif;
             padding: 20px;
-            background-color: #f8f9fa;
+            margin-bottom: 60px; /* Add margin to the bottom to avoid overlapping with footer */
+            background-color: #f8f9fa; /* Light grey background for better contrast */
+        }
+        .container {
+            min-height: calc(100vh - 80px); /* Ensure container takes up full height minus footer */
         }
         .card {
             margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for card depth */
         }
         .total-price {
             font-weight: bold;
@@ -43,12 +44,22 @@
             font-size: 1.5em;
             text-align: right;
         }
+        footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #343a40;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1 class="text-center">주문완료</h1>
+    <h1 class="text-center">주문내역</h1>
     <% List<OrderDetailVO> orderDetails = (List<OrderDetailVO>) request.getAttribute("orderDetails"); %>
     <% BigDecimal totalSum = (BigDecimal) request.getAttribute("totalSum"); %>
     <% if (orderDetails != null && !orderDetails.isEmpty()) { %>
@@ -57,13 +68,17 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-body">
-                    <img src="/img/m<%= detail.getMno() %>_c<%= detail.getCategory_id() %>.jpg" class="card-img-top" alt="<%= detail.getMenuName() %>" style="height: 200px; object-fit: cover; border-top-left-radius: 10px; border-top-right-radius: 10px;">
                     <h5 class="card-title"><%= detail.getMenuName() %></h5>
                     <p class="card-text">
                         <strong>가격:</strong> <%= detail.getMenuPrice().intValue() %>원<br>
                         <strong>수량:</strong> <%= detail.getQuantity() %><br>
                         <strong>총합:</strong> <span class="total-price"><%= detail.getTotal_price().intValue() %></span>원
                     </p>
+                    <form action="/remove" method="post" class="d-inline">
+                        <input type="hidden" name="ono" value="<%= detail.getOno() %>"/>
+                        <input type="hidden" name="mno" value="<%= detail.getMno() %>"/>
+                        <button class="btn btn-remove">삭제</button>
+                    </form>
                 </div>
             </div>
         </div>
