@@ -6,7 +6,6 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.log4j.Log4j2;
-import org.example.tablekioskproject.dao.KioskDAO;
 import org.example.tablekioskproject.vo.MenuVO;
 
 import java.io.IOException;
