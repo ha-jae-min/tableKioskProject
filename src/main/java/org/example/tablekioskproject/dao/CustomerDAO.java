@@ -76,19 +76,6 @@ public enum CustomerDAO {
         return BigDecimal.ZERO;
     }
 
-    // 장바구니에서 삭제
-    public void deleteOrderDetail(int ono, int mno) throws Exception {
-        String sql = "DELETE FROM tbl_k_detail WHERE ono = ? AND mno = ?";
-
-        @Cleanup Connection con = ConnectionUtil.INSTANCE.getDs().getConnection();
-        @Cleanup PreparedStatement ps = con.prepareStatement(sql);
-
-        ps.setInt(1, ono);
-        ps.setInt(2, mno);
-
-        ps.executeUpdate();
-    }
-
     // 카테고리별로 조회
     public List<MenuVO> getMenusByCategory(int categoryId) throws Exception {
         log.info("getMenusByCategory called");
@@ -152,7 +139,7 @@ public enum CustomerDAO {
     }
 
     // 따로 빼냄 gpt가
-    public int createOrderWithDetail(int tableNumber, int mno, int quantity, BigDecimal totalPrice) throws Exception {
+    public void createOrderWithDetail(int tableNumber, int mno, int quantity, BigDecimal totalPrice) throws Exception {
 
         OrderVO order = OrderVO.builder()
                 .table_number(tableNumber)
@@ -172,23 +159,6 @@ public enum CustomerDAO {
                 .build();
 
         insertOrderDetail(detail);
-
-        return ono;
     }
 
-    // 가격 가져오기
-    public BigDecimal getMenuPriceById(int mno) throws Exception {
-        log.info("getMenuPriceById called");
-        String sql = "SELECT price FROM tbl_k_menu WHERE mno = ?";
-
-        @Cleanup Connection con = ConnectionUtil.INSTANCE.getDs().getConnection();
-        @Cleanup PreparedStatement ps = con.prepareStatement(sql);
-        ps.setInt(1, mno);
-        @Cleanup ResultSet rs = ps.executeQuery();
-        if (rs.next()) {
-            return rs.getBigDecimal("price");
-        } else {
-            throw new Exception("Menu item not found");
-        }
-    }
 }

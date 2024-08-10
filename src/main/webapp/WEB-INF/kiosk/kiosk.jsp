@@ -134,6 +134,8 @@
                                 <form action="/order" method="post" target="orderDetailsFrame">
                                     <input type="hidden" name="mno" value="${menu.mno}" />
                                     <input type="hidden" name="table_number" value="1" />
+                                    <input type="hidden" name="price" value="${menu.price}" />
+                                    <input type="hidden" name="menu_name" value="${menu.name}" />
                                     <div class="input-group">
                                         <input type="number" id="quantity" name="quantity" class="form-control" min="1" value="1" />
                                         <div class="input-group-append">
