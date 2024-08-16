@@ -29,7 +29,7 @@ public class DetailController extends HttpServlet {
             // 주문 상세 정보를 가져옴
             List<OrderDetailVO> orderDetails = customerDAO.getAllOrderDetailsFromDB();
 
-            BigDecimal totalSum = customerDAO.getTotalPriceSum();  // 필요한 경우 수정 가능
+            BigDecimal totalSum = customerDAO.getTotalPriceSum();
 
             // 3. JSP에 데이터 전달 및 포워딩
             req.setAttribute("orderDetails", orderDetails);

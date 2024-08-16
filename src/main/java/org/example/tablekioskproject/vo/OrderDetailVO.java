@@ -3,6 +3,8 @@ package org.example.tablekioskproject.vo;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.DateTimeException;
+import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -17,4 +19,5 @@ public class OrderDetailVO {
     private BigDecimal menuPrice;
     private int quantity;
     private BigDecimal total_price;
+    private LocalDateTime o_time;
 }

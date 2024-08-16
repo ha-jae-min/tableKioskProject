@@ -33,7 +33,7 @@ public enum CustomerDAO {
 
         String sql = """
         SELECT d.ono, d.mno, m.name AS menu_name, m.category_id, 
-               m.price AS menu_price, d.quantity, d.total_price 
+               m.price AS menu_price, d.quantity, d.total_price, o.o_time 
         FROM tbl_k_menu m 
         INNER JOIN tbl_k_detail d ON m.mno = d.mno
         INNER JOIN tbl_k_order o ON d.ono = o.ono
@@ -54,6 +54,7 @@ public enum CustomerDAO {
                     .menuPrice(rs.getBigDecimal("menu_price"))
                     .quantity(rs.getInt("quantity"))
                     .total_price(rs.getBigDecimal("total_price"))
+                    .o_time(rs.getTimestamp("o_time").toLocalDateTime())
                     .build();
             detailsList.add(detail);
         }
@@ -147,21 +148,20 @@ public enum CustomerDAO {
         // 쿠키에서 주문 상세 정보를 가져오기
         List<OrderDetailVO> orderDetails = CookieOrderUtil.getCookies(req);
 
-        // 각 주문 정보를 처리하여 DB에 저장
+        // 주문을 먼저 생성
+        OrderVO order = OrderVO.builder()
+                .table_number(1) // 예시로 1번 테이블 지정, 실제로는 동적으로 설정
+                .o_sequence(1)
+                .o_status("주문 대기")
+                .o_date(LocalDate.now())
+                .o_time(LocalDateTime.now())
+                .build();
+
+        // 주문 저장 및 생성된 주문 번호 얻기
+        int ono = insertOrder(order);
+
+        // 각 주문 상세 정보를 tbl_k_detail 테이블에 저장
         for (OrderDetailVO detail : orderDetails) {
-            // 주문을 먼저 생성
-            OrderVO order = OrderVO.builder()
-                    .table_number(1) // 예시로 1번 테이블 지정, 실제로는 동적으로 할 수 있음
-                    .o_sequence(1)
-                    .o_status("주문 대기")
-                    .o_date(LocalDate.now())
-                    .o_time(LocalDateTime.now())
-                    .build();
-
-            // 주문 저장 및 생성된 주문 번호 얻기
-            int ono = insertOrder(order);
-
-            // 주문 상세 정보를 저장
             DetailVO orderDetail = DetailVO.builder()
                     .ono(ono)
                     .mno(detail.getMno()) // 메뉴 번호
@@ -172,6 +172,7 @@ public enum CustomerDAO {
             insertOrderDetail(orderDetail);
         }
     }
+
 
 
 }
