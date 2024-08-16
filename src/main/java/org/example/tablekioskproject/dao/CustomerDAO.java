@@ -27,22 +27,22 @@ public enum CustomerDAO {
     CustomerDAO() {}
 
     // 1번 테이블 모든 주문 데이터 가져옴
-    public List<OrderDetailVO> getAllOrderDetailsFromDB() throws Exception {
+    public List<OrderDetailVO> getAllOrderDetailsFromDB(int tableNumber) throws Exception {
         log.info("getAllOrderDetails called");
         List<OrderDetailVO> detailsList = new ArrayList<>();
 
         String sql = """
         SELECT d.ono, d.mno, m.name AS menu_name, m.category_id, 
-               m.price AS menu_price, d.quantity, d.total_price, o.o_time 
+               m.price AS menu_price, d.quantity, d.total_price, o.o_time , o.o_status
         FROM tbl_k_menu m 
         INNER JOIN tbl_k_detail d ON m.mno = d.mno
         INNER JOIN tbl_k_order o ON d.ono = o.ono
-        WHERE o.table_number = 1
+        WHERE o.table_number = ?
         """;
 
         @Cleanup Connection con = ConnectionUtil.INSTANCE.getDs().getConnection();
         @Cleanup PreparedStatement ps = con.prepareStatement(sql);
-//        ps.setInt(1, tableNumber); // 테이블 번호를 파라미터로 받아서 조회
+        ps.setInt(1, tableNumber); // 테이블 번호를 파라미터로 받아서 조회
         @Cleanup ResultSet rs = ps.executeQuery();
 
         while (rs.next()) {
@@ -55,6 +55,7 @@ public enum CustomerDAO {
                     .quantity(rs.getInt("quantity"))
                     .total_price(rs.getBigDecimal("total_price"))
                     .o_time(rs.getTimestamp("o_time").toLocalDateTime())
+                    .o_status(rs.getString("o_status"))
                     .build();
             detailsList.add(detail);
         }
@@ -64,16 +65,18 @@ public enum CustomerDAO {
 
 
     // 주문한 총합 계산
-    public BigDecimal getTotalPriceSum() throws Exception {
+    public BigDecimal getTotalPriceSum(int tableNumber) throws Exception {
         String sql = """
                     SELECT SUM(total_price) AS total_sum
                     FROM tbl_k_detail d
                     INNER JOIN tbl_k_order o ON d.ono = o.ono
-                    WHERE o.table_number = 1
+                    WHERE o.table_number = ?
                     """;
 
         @Cleanup Connection con = ConnectionUtil.INSTANCE.getDs().getConnection();
         @Cleanup PreparedStatement ps = con.prepareStatement(sql);
+
+        ps.setInt(1, tableNumber); // 테이블 번호를 파라미터로 받아서 조회
         @Cleanup ResultSet rs = ps.executeQuery();
         if (rs.next()) {
             return rs.getBigDecimal("total_sum");
@@ -150,7 +153,7 @@ public enum CustomerDAO {
 
         // 주문을 먼저 생성
         OrderVO order = OrderVO.builder()
-                .table_number(1) // 예시로 1번 테이블 지정, 실제로는 동적으로 설정
+                .table_number(3) // 예시로 1번 테이블 지정, 실제로는 동적으로 설정
                 .o_sequence(1)
                 .o_status("주문 대기")
                 .o_date(LocalDate.now())

@@ -30,6 +30,12 @@
 </head>
 <body>
 
+
+<div>
+    <form action="/login" method="get">
+        <button>사장님 로그인</button>
+    </form>
+</div>
 <div>
     <a href="kiosk" class="btn btn-primary btn-start">메뉴 보기</a>
 </div>

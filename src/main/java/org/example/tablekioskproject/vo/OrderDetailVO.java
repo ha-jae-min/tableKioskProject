@@ -20,4 +20,5 @@ public class OrderDetailVO {
     private int quantity;
     private BigDecimal total_price;
     private LocalDateTime o_time;
+    private String o_status;
 }
