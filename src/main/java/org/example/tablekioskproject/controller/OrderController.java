@@ -58,15 +58,7 @@ public class OrderController extends HttpServlet {
             // 쿠키에 주문 정보 추가
             CookieUtil.addOrderToCookie(req, resp, mno, menuName, tableNumber, price, quantity, totalPrice);
 
-
-            // OrderUtil을 사용하여 쿠키에서 주문 정보 가져오기
-            List<OrderDetailVO> orderDetails = CookieOrderUtil.getCookies(req);
-            BigDecimal totalSum = CookieOrderUtil.calculateTotalSum(orderDetails);
-
-            req.setAttribute("totalSum", totalSum);
-            req.setAttribute("orderDetails", orderDetails);
-
-            req.getRequestDispatcher("/WEB-INF/kiosk/orderDetails.jsp").forward(req, resp);
+            resp.sendRedirect("/order");
         } catch (Exception e) {
             log.error("Error processing order", e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error processing order");

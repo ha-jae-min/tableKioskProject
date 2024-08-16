@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.log4j.Log4j2;
 import org.example.tablekioskproject.common.CookieOrderUtil;
+import org.example.tablekioskproject.common.CookieUtil;
 import org.example.tablekioskproject.dao.CustomerDAO;
 import org.example.tablekioskproject.vo.OrderDetailVO;
 
@@ -22,21 +23,24 @@ public class DetailController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
+            // 1. 쿠키에 있는 주문 정보를 DB로 저장
+            customerDAO.createOrdersFromCookie(req);  // 쿠키에서 주문 정보를 가져와서 DB에 저장
 
-            // OrderUtil을 사용하여 쿠키에서 주문 정보 가져오기
-            List<OrderDetailVO> orderDetails = CookieOrderUtil.getCookies(req);
-            BigDecimal totalSum = CookieOrderUtil.calculateTotalSum(orderDetails);
+            // 주문 상세 정보를 가져옴
+            List<OrderDetailVO> orderDetails = customerDAO.getAllOrderDetailsFromDB();
 
-            // 여기서 쿠키에 있는 걸 DB로 넣는 거 하자
+            BigDecimal totalSum = customerDAO.getTotalPriceSum();  // 필요한 경우 수정 가능
 
-
-
-            req.setAttribute("totalSum", totalSum);
+            // 3. JSP에 데이터 전달 및 포워딩
             req.setAttribute("orderDetails", orderDetails);
+            req.setAttribute("totalSum", totalSum);
 
-            req.getRequestDispatcher("/WEB-INF/kiosk/orderDetails.jsp").forward(req, resp);
+            CookieUtil.removeAllOrderCookies(req, resp);
+
+            req.getRequestDispatcher("/WEB-INF/kiosk/detail.jsp").forward(req, resp);
+
         } catch (Exception e) {
-            log.error("Error fetching order details", e);
+            log.error("Error saving order details", e);
             throw new ServletException(e);
         }
     }

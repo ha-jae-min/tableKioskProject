@@ -1,8 +1,10 @@
 package org.example.tablekioskproject.dao;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.Cleanup;
 import lombok.extern.log4j.Log4j2;
 import org.example.tablekioskproject.common.ConnectionUtil;
+import org.example.tablekioskproject.common.CookieOrderUtil;
 import org.example.tablekioskproject.vo.DetailVO;
 import org.example.tablekioskproject.vo.MenuVO;
 import org.example.tablekioskproject.vo.OrderDetailVO;
@@ -25,23 +27,24 @@ public enum CustomerDAO {
     CustomerDAO() {}
 
     // 1번 테이블 모든 주문 데이터 가져옴
-    public List<OrderDetailVO> getAllOrderDetails() throws Exception {
+    public List<OrderDetailVO> getAllOrderDetailsFromDB() throws Exception {
         log.info("getAllOrderDetails called");
         List<OrderDetailVO> detailsList = new ArrayList<>();
 
         String sql = """
-            SELECT d.ono, d.mno, m.name AS menu_name, m.category_id, 
-                   m.price AS menu_price, d.quantity, d.total_price 
-            FROM tbl_k_menu m 
-            INNER JOIN tbl_k_detail d ON m.mno = d.mno
-            INNER JOIN tbl_k_order o ON d.ono = o.ono
-            WHERE o.table_number = 1
-            """;
-
+        SELECT d.ono, d.mno, m.name AS menu_name, m.category_id, 
+               m.price AS menu_price, d.quantity, d.total_price 
+        FROM tbl_k_menu m 
+        INNER JOIN tbl_k_detail d ON m.mno = d.mno
+        INNER JOIN tbl_k_order o ON d.ono = o.ono
+        WHERE o.table_number = 1
+        """;
 
         @Cleanup Connection con = ConnectionUtil.INSTANCE.getDs().getConnection();
         @Cleanup PreparedStatement ps = con.prepareStatement(sql);
+//        ps.setInt(1, tableNumber); // 테이블 번호를 파라미터로 받아서 조회
         @Cleanup ResultSet rs = ps.executeQuery();
+
         while (rs.next()) {
             OrderDetailVO detail = OrderDetailVO.builder()
                     .ono(rs.getInt("ono"))
@@ -57,6 +60,7 @@ public enum CustomerDAO {
 
         return detailsList;
     }
+
 
     // 주문한 총합 계산
     public BigDecimal getTotalPriceSum() throws Exception {
@@ -139,26 +143,35 @@ public enum CustomerDAO {
     }
 
     // 따로 빼냄 gpt가
-    public void createOrderWithDetail(int tableNumber, int mno, int quantity, BigDecimal totalPrice) throws Exception {
+    public void createOrdersFromCookie(HttpServletRequest req) throws Exception {
+        // 쿠키에서 주문 상세 정보를 가져오기
+        List<OrderDetailVO> orderDetails = CookieOrderUtil.getCookies(req);
 
-        OrderVO order = OrderVO.builder()
-                .table_number(tableNumber)
-                .o_sequence(1)
-                .o_status("주문 대기")
-                .o_date(LocalDate.now())
-                .o_time(LocalDateTime.now())
-                .build();
+        // 각 주문 정보를 처리하여 DB에 저장
+        for (OrderDetailVO detail : orderDetails) {
+            // 주문을 먼저 생성
+            OrderVO order = OrderVO.builder()
+                    .table_number(1) // 예시로 1번 테이블 지정, 실제로는 동적으로 할 수 있음
+                    .o_sequence(1)
+                    .o_status("주문 대기")
+                    .o_date(LocalDate.now())
+                    .o_time(LocalDateTime.now())
+                    .build();
 
-        int ono = insertOrder(order);
+            // 주문 저장 및 생성된 주문 번호 얻기
+            int ono = insertOrder(order);
 
-        DetailVO detail = DetailVO.builder()
-                .ono(ono)
-                .mno(mno)
-                .quantity(quantity)
-                .total_price(totalPrice)
-                .build();
+            // 주문 상세 정보를 저장
+            DetailVO orderDetail = DetailVO.builder()
+                    .ono(ono)
+                    .mno(detail.getMno()) // 메뉴 번호
+                    .quantity(detail.getQuantity()) // 수량
+                    .total_price(detail.getTotal_price()) // 총 가격
+                    .build();
 
-        insertOrderDetail(detail);
+            insertOrderDetail(orderDetail);
+        }
     }
+
 
 }
