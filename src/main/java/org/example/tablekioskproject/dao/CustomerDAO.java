@@ -26,6 +26,22 @@ public enum CustomerDAO {
 
     CustomerDAO() {}
 
+    // 사장님 화면에서 주문 상태 업데이트
+    public void updateOrderStatus(int ono, String o_status, int table_number, int o_sequence) throws Exception {
+        String query = "UPDATE tbl_k_order SET o_status = ?, table_number = ?, o_sequence = ? WHERE ono = ?";
+
+        @Cleanup Connection con = ConnectionUtil.INSTANCE.getDs().getConnection();
+        @Cleanup PreparedStatement ps = con.prepareStatement(query);
+
+        ps.setString(1, o_status);
+        ps.setInt(2, table_number);
+        ps.setInt(3, o_sequence);
+        ps.setInt(4, ono);
+
+        ps.executeUpdate();
+
+    }
+
     // 1번 테이블 모든 주문 데이터 가져옴
     public List<OrderDetailVO> getAllOrderDetailsFromDB(int tableNumber) throws Exception {
         log.info("getAllOrderDetails called");

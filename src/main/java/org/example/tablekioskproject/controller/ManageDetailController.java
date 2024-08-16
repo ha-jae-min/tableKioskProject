@@ -45,6 +45,16 @@ public class ManageDetailController extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        super.doPost(req, resp);
+
+        try {
+            int ono = Integer.parseInt(req.getParameter("ono"));
+            customerDAO.updateOrderStatus(ono, "주문 완료", 1, 1);
+
+            resp.sendRedirect("/manageDetails?table_number=" + req.getParameter("table_number"));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+
     }
 }

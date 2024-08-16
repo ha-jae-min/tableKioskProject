@@ -5,6 +5,8 @@
 <%@ page import="java.util.stream.Collectors" %>
 <%@ page import="java.math.BigDecimal" %>
 <%@ page import="java.time.format.DateTimeFormatter" %>
+<%@ page import="java.util.ArrayList" %>
+<%@ page import="java.util.Collections" %>
 
 
 <!DOCTYPE html>
@@ -49,6 +51,12 @@
             margin-bottom: 30px;
             margin-top: 20px;
         }
+        .d-flex {
+            display: flex !important;
+        }
+        .justify-content-between {
+            justify-content: space-between !important;
+        }
     </style>
 </head>
 <body>
@@ -63,23 +71,46 @@
         Map<Integer, List<OrderDetailVO>> groupedOrders = orderDetails.stream()
                 .collect(Collectors.groupingBy(OrderDetailVO::getOno));
 
+        // ono 순서대로 정렬
+        List<Integer> sortedOnoList = new ArrayList<>(groupedOrders.keySet());
+        Collections.sort(sortedOnoList, Collections.reverseOrder());
+
+
         // DateTimeFormatter를 생성하여 HH:mm:ss 형식으로 시간을 표시
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
     %>
 
-    <h1 class="text-center"><%= table_number%>번 테이블</h1>
-    <% if (groupedOrders != null && !groupedOrders.isEmpty()) { %>
+    <h1 class="text-center"><%= table_number %>번 테이블</h1>
+    <form action="/manage" method="get">
+        <button class="btn btn-primary">테이블 목록</button>
+    </form>
+    <% if (sortedOnoList != null && !sortedOnoList.isEmpty()) { %>
     <div class="row">
-        <% for (Map.Entry<Integer, List<OrderDetailVO>> entry : groupedOrders.entrySet()) { %>
+        <% for (Integer ono : sortedOnoList) {
+            List<OrderDetailVO> orderGroup = groupedOrders.get(ono);
+        %>
         <div class="col-md-12">
             <div class="card">
                 <div class="card-body">
-                    <p class="card-text">
-                        <strong>주문 시간:</strong>
-                        <%= entry.getValue().get(0).getO_time().format(timeFormatter) %>
-                    </p>
+                    <div class="d-flex justify-content-between">
+                        <p class="card-text">
+                            <strong>주문 시간:</strong>
+                            <%= orderGroup.get(0).getO_time().format(timeFormatter) %>
+                        </p>
+                        <div class="d-flex align-items-center">
+                            <p class="card-text mr-3">
+                                <strong>상태:</strong>
+                                <%= orderGroup.get(0).getO_status() %>
+                            </p>
+                            <form action="/manageDetails" method="post">
+                                <input type="hidden" name="table_number" value="<%= table_number %>">
+                                <input type="hidden" name="ono" value="<%= ono %>">
+                                <button class="btn btn-primary">완료</button>
+                            </form>
+                        </div>
+                    </div>
                     <div class="row">
-                        <% for (OrderDetailVO detail : entry.getValue()) { %>
+                        <% for (OrderDetailVO detail : orderGroup) { %>
                         <div class="col-md-4">
                             <div class="card">
                                 <img src="/img/m<%= detail.getMno() %>_c<%= detail.getCategory_id() %>.jpg" class="card-img-top" alt="<%= detail.getMenuName() %>" style="height: 150px; object-fit: cover;">
